@@ -1,0 +1,8 @@
+pandas
+numpy
+opencv-python-headless
+tqdm
+jupyter
+matplotlib
+seaborn
+kaggle

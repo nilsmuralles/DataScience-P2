@@ -1,0 +1,11 @@
+data/raw/*
+!data/raw/train_annotations.csv
+data/processed/frames/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
+.vscode/
+.idea/
