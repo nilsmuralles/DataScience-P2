@@ -3,3 +3,7 @@ logreg,1606b0e6_0,"{'clf__C': 0.01, 'clf__class_weight': None}",0.22260477376205
 logreg,1606b0e6_1,"{'clf__C': 0.1, 'clf__class_weight': None}",0.21809002001319688
 logreg,35bd9041_0,"{'clf__C': 10, 'clf__class_weight': None}",0.2319467915384531
 logreg,final,"{'clf__C': 10, 'clf__class_weight': None}",0.22792036900087154
+rf,1606b0e6_0,"{'clf__n_estimators': 500, 'clf__min_samples_leaf': 5, 'clf__max_features': 'log2', 'clf__max_depth': 20, 'clf__class_weight': None}",0.23570556328267014
+rf,1606b0e6_1,"{'clf__n_estimators': 100, 'clf__min_samples_leaf': 1, 'clf__max_features': 'log2', 'clf__max_depth': None, 'clf__class_weight': 'balanced_subsample'}",0.23418957665606588
+rf,35bd9041_0,"{'clf__n_estimators': 100, 'clf__min_samples_leaf': 1, 'clf__max_features': 'log2', 'clf__max_depth': None, 'clf__class_weight': 'balanced_subsample'}",0.2547102564763772
+rf,final,"{'clf__n_estimators': 300, 'clf__min_samples_leaf': 1, 'clf__max_features': 'log2', 'clf__max_depth': None, 'clf__class_weight': 'balanced_subsample'}",0.255448752221384
