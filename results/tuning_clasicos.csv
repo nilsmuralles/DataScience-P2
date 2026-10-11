@@ -1,0 +1,5 @@
+model,fold,best_params,best_inner_f1
+logreg,1606b0e6_0,"{'clf__C': 0.01, 'clf__class_weight': None}",0.22260477376205168
+logreg,1606b0e6_1,"{'clf__C': 0.1, 'clf__class_weight': None}",0.21809002001319688
+logreg,35bd9041_0,"{'clf__C': 10, 'clf__class_weight': None}",0.2319467915384531
+logreg,final,"{'clf__C': 10, 'clf__class_weight': None}",0.22792036900087154
