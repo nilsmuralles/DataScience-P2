@@ -16,8 +16,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from sklearn.metrics import silhouette_score
+
 from core import (CLASS_COLORS, CLASS_LABELS, CLASSES, FEATURE_LABELS, FEATURES,
-                  FIG_DIR, ROOT, load_frame_metrics, load_models, load_results,
+                  FIG_DIR, ROOT, load_cnn_pca, load_frame_metrics, load_models, load_results,
                   model_color_map, model_name, predict_all, sort_models)
 from src.features import decode_image
 
@@ -152,6 +154,43 @@ with tab_exp:
         with st.expander("Estadísticas descriptivas por clase"):
             st.dataframe(d.groupby("label")[FEATURES].agg(["mean", "std"]).reindex(order).round(3),
                          width="stretch")
+
+        # --- lo que ve el modelo CNN: vectores de la ResNet18 reducidos a 2D
+        with st.expander("Lo que ve el modelo CNN (ResNet18)"):
+            pca = load_cnn_pca()
+            dp = (d[["video_id", "time_s", "label"]].merge(pca.drop(columns="label"), on=["video_id", "time_s"])
+                  if not pca.empty else pca)
+            if dp.empty:
+                st.caption("Falta `data/processed/cnn_pca.csv` (se genera con el notebook 07).")
+            else:
+                st.markdown("El modelo CNN no usa las 5 propiedades: describe cada frame con **512 valores** "
+                            "de una ResNet18 preentrenada. Aquí se resumen en 2 ejes (PCA).")
+                por = st.radio("Colorear por", ["Clase", "Video"], horizontal=True)
+                # colores libres de la paleta validada; se asignan sobre todos los videos para que
+                # un video no cambie de color al filtrar
+                vmap = dict(zip(videos, ["#eda100", "#e87ba4", "#008300"]))
+                col, cm_ = ("label", cmap) if por == "Clase" else ("video_id", vmap)
+                sample = dp.sample(min(len(dp), 3000), random_state=0)
+                fig = px.scatter(sample, x="pc1", y="pc2", color=col, color_discrete_map=cm_,
+                                 category_orders={"label": order, "video_id": videos}, opacity=0.55,
+                                 hover_data={"video_id": True, "time_s": True, "label": True},
+                                 title=f"Frames en el espacio de la ResNet18, por {por.lower()} "
+                                       f"(muestra de {len(sample):,})")
+                fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
+                fig.update_xaxes(title="Componente 1")
+                fig.update_yaxes(title="Componente 2")
+                show(fig, 450)
+
+                # silhouette: 1 = grupos separados, 0 o negativo = grupos mezclados
+                k = st.columns(2)
+                for c, (nombre, g) in zip(k, [("clase (evento)", "label"), ("video (partido)", "video_id")]):
+                    val = (silhouette_score(sample[["pc1", "pc2"]], sample[g])
+                           if sample[g].nunique() > 1 else float("nan"))
+                    c.metric(f"Separación por {nombre}", f"{val:.2f}", "silhouette, de -1 a 1",
+                             delta_color="off")
+                st.caption("Los frames se agrupan por **video**, no por **evento**: la red reconoce el "
+                           "partido (estadio, luz, césped) mejor que la jugada. Por eso el modelo CNN "
+                           "apenas supera al Dummy.")
 
         # --- galería
         st.subheader("Galería de frames")

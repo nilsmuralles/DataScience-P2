@@ -96,6 +96,13 @@ def load_frame_metrics() -> pd.DataFrame:
 
 
 @st.cache_data
+def load_cnn_pca() -> pd.DataFrame:
+    """Vectores de la ResNet18 reducidos a 2D con PCA (los genera notebooks/07_modelo_cnn.ipynb)."""
+    f = PROC / "cnn_pca.csv"
+    return pd.read_csv(f) if f.exists() else pd.DataFrame()
+
+
+@st.cache_data
 def load_results(kind: str) -> pd.DataFrame:
     """Concatena todos los results/<kind>_*.csv (metrics o predictions)."""
     frames = []
