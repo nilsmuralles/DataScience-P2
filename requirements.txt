@@ -6,3 +6,9 @@ jupyter
 matplotlib
 seaborn
 kaggle
+scikit-learn>=1.9.1
+joblib
+streamlit
+plotly
+torch
+torchvision
