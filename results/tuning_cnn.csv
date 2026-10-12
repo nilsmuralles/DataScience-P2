@@ -1,0 +1,5 @@
+model,fold,best_params,best_inner_f1,n_combinaciones,tiempo_busqueda_s
+cnn,1606b0e6_0,"{'clf': LogisticRegression(max_iter=2000, random_state=42), 'clf__C': 0.001, 'clf__class_weight': None}",0.22371183070509743,14,28.95940520009026
+cnn,1606b0e6_1,"{'clf': MLPClassifier(early_stopping=True, max_iter=300, random_state=42), 'clf__alpha': 1, 'clf__hidden_layer_sizes': (256,)}",0.23709722707348463,14,7.03278120001778
+cnn,35bd9041_0,"{'clf': MLPClassifier(early_stopping=True, max_iter=300, random_state=42), 'clf__alpha': 1, 'clf__hidden_layer_sizes': (256,)}",0.2577402633514515,14,6.869776400271803
+cnn,final,"{'clf': MLPClassifier(early_stopping=True, max_iter=300, random_state=42), 'clf__alpha': 1, 'clf__hidden_layer_sizes': (256,)}",0.24679453518097685,14,15.76788489986211
