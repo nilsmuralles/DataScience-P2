@@ -46,13 +46,13 @@ MODEL_NAMES = {
     "hgb": "HistGradientBoosting",
     "cnn": "ResNet18 + clasificador",
 }
-# El Dummy va en gris a propósito: es la referencia, no un competidor.
+# Tonos para fondo oscuro. El Dummy va en gris a propósito: es la referencia, no un competidor.
 MODEL_COLORS = {
     "dummy": "#8a8984",
-    "logreg": "#2a78d6",
-    "rf": "#eb6834",
-    "hgb": "#1baf7a",
-    "cnn": "#6250d6",
+    "logreg": "#3987e5",
+    "rf": "#d95926",
+    "hgb": "#199e70",
+    "cnn": "#9085e9",
 }
 _EXTRA_MODEL_COLORS = ["#eda100", "#e87ba4", "#008300"]
 
@@ -112,7 +112,7 @@ def load_results(kind: str) -> pd.DataFrame:
 
 # -------------------------------------------------------------- modelos
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_models() -> dict:
     """Carga todo lo que haya en models/*.joblib. Devuelve {clave: modelo}."""
     models = {}
@@ -133,7 +133,7 @@ def is_cnn(key: str, model) -> bool:
     return key.startswith("cnn") or names is None or list(names) != FEATURES
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def _cnn_extractor():
     """Función de src/cnn_features.py que convierte un frame BGR en un vector."""
     mod = importlib.import_module("src.cnn_features")

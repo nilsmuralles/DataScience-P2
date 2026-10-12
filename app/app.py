@@ -23,14 +23,23 @@ from src.features import decode_image
 
 st.set_page_config(page_title="Detección de eventos · Bundesliga", page_icon="⚽", layout="wide")
 
+SURFACE = "#1a1a19"  # separa barras y puntos con el color del fondo
 PLOT_CFG = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
-LAYOUT = dict(margin=dict(l=10, r=10, t=50, b=10), font=dict(size=13),
+LAYOUT = dict(margin=dict(l=10, r=10, t=40, b=10), font=dict(size=13),
               legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, title=None),
               hoverlabel=dict(font_size=13))
 
 
 def show(fig, height=380):
-    fig.update_layout(height=height, **LAYOUT)
+    # El título va como texto de Streamlit: dentro de Plotly choca con la leyenda.
+    title = fig.layout.title.text
+    if title:
+        st.markdown(f"**{title}**")
+    fig.update_layout(height=height, title_text="", **LAYOUT)
+    for ax in ("yaxis", "xaxis"):
+        rng = fig.layout[ax].range
+        if rng is not None:
+            fig.layout[ax].autorange = False
     st.plotly_chart(fig, width="stretch", config=PLOT_CFG)
 
 
@@ -78,7 +87,7 @@ with tab_exp:
         top = counts.sort_values("frames", ascending=False).iloc[0]
         k = st.columns(len(order))
         for col, r in zip(k, counts.itertuples(index=False)):
-            col.metric(CLASS_LABELS[r.clase], f"{r.frames:,}", f"{r.pct:.1f}% del total", delta_color="off")
+            col.metric(CLASS_LABELS[r.clase], f"{r.frames:,}", f"{r.pct:.1f}% del total", delta_color="off", delta_arrow="off")
 
         a, b = st.columns(2)
         with a:
@@ -95,7 +104,7 @@ with tab_exp:
             fig = px.bar(pv, y="video_id", x="%", color="label", orientation="h",
                          color_discrete_map=cmap, category_orders={"label": order},
                          title="Composición de clases por video", custom_data=["frames"])
-            fig.update_traces(marker_line_color="white", marker_line_width=2,
+            fig.update_traces(marker_line_color=SURFACE, marker_line_width=2,
                               hovertemplate="%{y} · %{fullData.name}: %{x:.1f}% (%{customdata[0]:,})<extra></extra>")
             fig.update_xaxes(title="% de frames del video", range=[0, 100])
             fig.update_yaxes(title=None)
@@ -137,7 +146,7 @@ with tab_exp:
                              category_orders={"label": order}, opacity=0.55,
                              hover_data={"video_id": True, "time_s": True},
                              title=f"{feat} vs {x2} (muestra de {len(sample):,} frames)")
-            fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
+            fig.update_traces(marker=dict(size=8, line=dict(width=1, color=SURFACE)))
             show(fig, 450)
 
         with st.expander("Estadísticas descriptivas por clase"):
@@ -219,7 +228,7 @@ with tab_clf:
                         p = getattr(r, f"proba_{r.pred}")
                         extra = f" · F1 macro en prueba {f1[r.model]:.2f}" if r.model in f1 else ""
                         cards[i % len(cards)].metric(r.modelo, CLASS_LABELS[r.pred],
-                                                     f"confianza {p:.0%}{extra}", delta_color="off")
+                                                     f"confianza {p:.0%}{extra}", delta_color="off", delta_arrow="off")
 
                     long = res.melt(id_vars=["modelo"], value_vars=[f"proba_{c}" for c in CLASSES],
                                     var_name="clase", value_name="probabilidad")
@@ -227,7 +236,7 @@ with tab_clf:
                     fig = px.bar(long, y="modelo", x="probabilidad", color="clase", orientation="h",
                                  color_discrete_map=CLASS_COLORS, category_orders={"clase": CLASSES},
                                  title="Probabilidad que asigna cada modelo a cada clase")
-                    fig.update_traces(marker_line_color="white", marker_line_width=2,
+                    fig.update_traces(marker_line_color=SURFACE, marker_line_width=2,
                                       hovertemplate="%{y} · %{fullData.name}: %{x:.1%}<extra></extra>")
                     fig.update_xaxes(tickformat=".0%", range=[0, 1], title=None)
                     fig.update_yaxes(title=None, autorange="reversed")
@@ -264,8 +273,8 @@ with tab_perf:
             best = res.f1_macro.idxmax()
             acc_best = res.accuracy.idxmax()
             k = st.columns(3)
-            k[0].metric("Mejor F1 macro", best, f"{res.f1_macro.max():.3f}", delta_color="off")
-            k[1].metric("Mejor accuracy", acc_best, f"{res.accuracy.max():.3f}", delta_color="off")
+            k[0].metric("Mejor F1 macro", best, f"{res.f1_macro.max():.3f}", delta_color="off", delta_arrow="off")
+            k[1].metric("Mejor accuracy", acc_best, f"{res.accuracy.max():.3f}", delta_color="off", delta_arrow="off")
             k[2].metric("Videos de prueba (folds)", m.fold.nunique())
             if acc_best != best:
                 st.warning(f"**El accuracy engaña:** *{acc_best}* gana en accuracy pero no en F1 macro. "
@@ -281,7 +290,7 @@ with tab_perf:
                              error_y="std", color_discrete_map=mcmap,
                              category_orders={"modelo": morder},
                              title="Accuracy vs. F1 macro (media ± desv. entre videos)")
-                fig.update_traces(marker_line_color="white", marker_line_width=2,
+                fig.update_traces(marker_line_color=SURFACE, marker_line_width=2,
                                   hovertemplate="%{fullData.name}: %{y:.3f}<extra></extra>")
                 fig.update_yaxes(range=[0, 1], title=None)
                 fig.update_xaxes(title=None)
@@ -294,7 +303,7 @@ with tab_perf:
                 fig = px.bar(pc, x="clase", y="F1", color="modelo", barmode="group",
                              color_discrete_map=mcmap, category_orders={"modelo": morder, "clase": CLASSES},
                              title="F1 por clase")
-                fig.update_traces(marker_line_color="white", marker_line_width=2,
+                fig.update_traces(marker_line_color=SURFACE, marker_line_width=2,
                                   hovertemplate="%{x} · %{fullData.name}: %{y:.3f}<extra></extra>")
                 fig.update_yaxes(range=[0, 1], title=None)
                 fig.update_xaxes(title=None)
@@ -304,7 +313,7 @@ with tab_perf:
             fig = px.strip(m, x="f1_macro", y="modelo", color="modelo", color_discrete_map=mcmap,
                            category_orders={"modelo": morder}, hover_data={"fold": True},
                            title="F1 macro en cada video de prueba")
-            fig.update_traces(marker=dict(size=13, line=dict(width=2, color="white")), showlegend=False)
+            fig.update_traces(marker=dict(size=13, line=dict(width=2, color=SURFACE)), showlegend=False)
             fig.update_xaxes(title="F1 macro")
             fig.update_yaxes(title=None)
             show(fig, 120 + 50 * len(sel))
@@ -319,10 +328,11 @@ with tab_perf:
                                      color_discrete_map=mcmap, log_x=True,
                                      category_orders={"modelo": morder},
                                      title="¿Vale la pena el costo? " + lab.split(" (")[0])
-                    fig.update_traces(marker=dict(size=16, line=dict(width=2, color="white")),
-                                      textposition="top center", showlegend=False,
+                    fig.update_traces(marker=dict(size=16, line=dict(width=2, color=SURFACE)),
+                                      textposition="top center", showlegend=False, cliponaxis=False,
                                       hovertemplate="%{text}<br>%{x:.4g}<br>F1 macro %{y:.3f}<extra></extra>")
-                    fig.update_xaxes(title=lab)
+                    lo, hi = np.log10(r2[t].clip(lower=1e-6)).agg(["min", "max"])
+                    fig.update_xaxes(title=lab, range=[lo - 0.6, hi + 0.6])
                     fig.update_yaxes(title="F1 macro")
                     show(fig)
 
@@ -341,7 +351,7 @@ with tab_perf:
                 cm = pd.crosstab(pm.label, pm.pred).reindex(index=CLASSES, columns=CLASSES, fill_value=0)
                 pct = cm.div(cm.sum(axis=1).replace(0, np.nan), axis=0)
                 fig = go.Figure(go.Heatmap(
-                    z=pct.values, x=CLASSES, y=CLASSES, colorscale="Blues", zmin=0, zmax=1,
+                    z=pct.values, x=CLASSES, y=CLASSES, colorscale=[[0, "#262624"], [1, "#2f7fd8"]], textfont=dict(color="#f0efec", size=14), zmin=0, zmax=1,
                     text=[[f"{v:.0%}<br>({n:,})" for v, n in zip(rp, rn)]
                           for rp, rn in zip(pct.fillna(0).values, cm.values)],
                     texttemplate="%{text}", colorbar=dict(title="% de la fila", tickformat=".0%"),
@@ -362,7 +372,7 @@ with tab_perf:
                                  color_discrete_map=CLASS_COLORS,
                                  category_orders={"pred": CLASSES, "modelo": ["Real (etiquetas)"] + morder},
                                  title="Qué clases predice cada modelo")
-                    fig.update_traces(marker_line_color="white", marker_line_width=2,
+                    fig.update_traces(marker_line_color=SURFACE, marker_line_width=2,
                                       hovertemplate="%{y} · %{fullData.name}: %{x:.1f}%<extra></extra>")
                     fig.update_xaxes(range=[0, 100], title="% de predicciones")
                     fig.update_yaxes(title=None)
